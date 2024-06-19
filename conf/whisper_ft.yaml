@@ -1,0 +1,59 @@
+seed: 777
+debug: False
+gpus: 1
+stage: 1
+stop_stage: 100
+skip_stages:
+test_only: False
+test_from_checkpoint:
+resume_from_checkpoint:
+data:
+  txt_norm: whisper
+  train_set: fisher
+  test_set: fisher
+  fisher:
+    tr_dsets: [training_set_p1]
+    audio_dir: /raid/users/gmorrone/data/AGEVOLA/Fisher_wavs/clean_rttm_partial
+    manifest_dir: /raid/users/popcornell/SynthSpeech/egs/fisher/asr/local/fisher_split
+    csv_dir: /raid/users/popcornell/SynthSpeech/egs/fisher/asr/local/fisher_split
+  nemo:
+    limit_ex: #20000
+    manifest_dir: /raid/users/popcornell/NeMoSpeechDataSim/
+  mixer6:
+    manifest_dir: /raid/users/popcornell/CHiME6/tmp_chimeutils/lhotse_manifests/mixer6
+  parakeet:
+    audio_dir:
+    text_file:
+    manifest_dir:
+  discard_shorter: -1
+  discard_longer: 30
+tokenizer:
+  # note if change also change whisper decoding !!!!
+  sot_sym: "¿"
+  sot_style: kanda
+training:
+  limit_train_batches: 1.0 #1.0 #10000 2 epochs 0.81
+  limit_val_batches: 1.0
+  max_epochs: 5
+  batch_size: 32
+  gradient_clip: 5.0
+  #label_smoothing: 0.1
+  early_stop_patience: 4
+  validation_interval: 1
+  strategy: ddp #ddp_find_unused_parameters_true
+  gradient_accumulation_steps: 1
+  precision: bf16-mixed
+  num_workers: 8
+opt:
+  scheduler: warmup
+  type: adamw
+  learning_rate: 1e-4
+  adam_epsilon: 1e-8
+  weight_decay: 0.0 # only used if adamw
+warmup:
+  warmup_steps: 1 # epochs, only decay we are fine-tuning
+whisper:
+  model: medium #large-v2
+  #gradient_checkpointing: False # not implemented for now !
+  beam_size: 5
+  lora: True
